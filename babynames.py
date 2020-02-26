@@ -100,11 +100,10 @@ def print_info(file_list, create_summary):
             print("\n".join(extract_names(x)))
 
 
-
 def main(args):
     # Create a command-line parser object with parsing rules
     parser = create_parser()
-    # Run the parser to collect command-line 
+    # Run the parser to collect command-line
     # arguments into a NAMESPACE called 'ns'
     ns = parser.parse_args(args)
 
@@ -118,8 +117,6 @@ def main(args):
     create_summary = ns.summaryfile
 
     print_info(file_list, create_summary)
-
-
 
     # For each filename, call `extract_names` with that single file.
     # Format the resulting list a vertical list (separated by newline \n)
