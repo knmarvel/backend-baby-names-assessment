@@ -14,6 +14,9 @@ import sys
 import re
 import argparse
 
+
+__author__ = "knmarvel"
+
 """
 Define the extract_names() function below and change main()
 to call it.
@@ -42,29 +45,67 @@ Suggested milestones for incremental development:
 def extract_names(filename):
     """
     Given a single file name for babyXXXX.html, returns a single list starting
-    with the year string followed by the name-rank strings in alphabetical order.
+    with the year string followed by the name-rank strings in alphabetical
+    order.
     ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
     """
     names = []
-    # +++your code here+++
-    return names
+
+    names.append(re.findall("\d\d\d\d", filename)[0])
+
+    with open(filename, "r") as f:
+        f = f.read()
+
+    names_list = re.findall("<td>(.+?)</td>", f)
+
+    names_dict = {}
+
+    for index in range(len(names_list)):
+        if index % 3 != 0:
+            if index % 3 == 2:
+                name = names_list[index]
+                value = names_list[index-2]
+            elif index % 3 == 1:
+                name = names_list[index]
+                value = names_list[index-1]
+            if name not in names_dict:
+                names_dict[name] = value
+            elif int(value) < int(names_dict[name]):
+                names_dict[name] = value
+    for name in names_dict:
+        names.append(name + " " + names_dict[name])
+    return sorted(names)
 
 
 def create_parser():
     """Create a cmd line parser object with 2 argument definitions"""
-    parser = argparse.ArgumentParser(description="Extracts and alphabetizes baby names from html.")
+    parser = argparse.ArgumentParser(
+        description="Extracts and alphabetizes baby names from html.")
     parser.add_argument(
         '--summaryfile', help='creates a summary file', action='store_true')
     # The nargs option instructs the parser to expect 1 or more filenames.
-    # It will also expand wildcards just like the shell, e.g. 'baby*.html' will work.
+    # It will also expand wildcards just like the shell, e.g.
+    # 'baby*.html' will work.
     parser.add_argument('files', help='filename(s) to parse', nargs='+')
     return parser
+
+
+def print_info(file_list, create_summary):
+
+    for x in file_list:
+        if create_summary:
+            with open(x + ".summary", "w") as file:
+                file.write("\n".join(extract_names(x)) + "\n")
+        else:
+            print("\n".join(extract_names(x)))
+
 
 
 def main(args):
     # Create a command-line parser object with parsing rules
     parser = create_parser()
-    # Run the parser to collect command-line arguments into a NAMESPACE called 'ns'
+    # Run the parser to collect command-line 
+    # arguments into a NAMESPACE called 'ns'
     ns = parser.parse_args(args)
 
     if not ns:
@@ -75,6 +116,10 @@ def main(args):
 
     # option flag
     create_summary = ns.summaryfile
+
+    print_info(file_list, create_summary)
+
+
 
     # For each filename, call `extract_names` with that single file.
     # Format the resulting list a vertical list (separated by newline \n)
